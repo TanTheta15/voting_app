@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 
 //Define the person schema
 const userSchema = new mongoose.Schema({
@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
         type : Number,
         required : true,
         unique : true
+    },
+    password : {
+        type : String,
+        required : true
     },
     role : {
         type : String, 

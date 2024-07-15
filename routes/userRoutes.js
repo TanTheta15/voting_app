@@ -2,11 +2,16 @@ const express = require('express');
 const router = express.Router();
 const User = require('./../Models/user');
 const {jwtAuthMiddleware, generateToken} = require('./../jwt');
- 
+
 //POST route to add a person 
 router.post('/signup', async (req, res) => {
     try{
         const data = req.body; // Assuming the request body contains the person data 
+        
+        const adminUser = await User.findOne({role : 'admin'});
+        if(data.role === 'admin' && adminUser){
+            return res.status(400).json({error : 'Admin already exists'});
+        }
         const newUser = new User(data);
 
         //Save the new user to the database
@@ -60,6 +65,10 @@ router.post('/login', async (req, res) => {
 //Profile route 
 router.get('/profile', jwtAuthMiddleware, async (req, res) => {
     try{
+        if(!await checkAdminRole){
+            return res.status(403).json({error : 'Admin already present'})
+        }
+
         const userData = req.user;
         const userId = userData.id;
         const user = await Person.findById(userId);
@@ -73,6 +82,10 @@ router.get('/profile', jwtAuthMiddleware, async (req, res) => {
 
 router.put('/profile/password', jwtAuthMiddleware, async (req, res) => {
     try{
+        if(!await checkAdminRole){
+            return res.status(403).json({error : 'Admin already present'})
+        }
+
         const userId = req.user.id;     //Extract the id from the token
         const {currentPassword, newPassword} = req.body;//Extract the current and new password from the request body
         //Find the user by userId 
